@@ -2,7 +2,7 @@
 CURR_DIR=$(cd $(dirname $0); pwd)
 PROJ_DIR=$(cd $(dirname $0)/../; pwd)
 
-mkdir -p $CURR_DIR/symbol
+mkdir -p symbol
 
 echo "Run python code ..."
 python $CURR_DIR/rnd_img_infer.py
