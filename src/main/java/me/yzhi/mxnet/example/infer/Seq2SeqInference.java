@@ -32,8 +32,8 @@ public class Seq2SeqInference {
     final int INPUT_LANG_NWORDS = 11;
     final int OUTPUT_LANG_NWORDS = 6;
 
-    float input[] = {6f, 7f, 8f, 5f, 1f};
-    NDArray modelInput = NDArray.array(input, Shape.create(1,5), Context.cpu(0));
+    float input[] = inputLang.getInput("je vais bien .");
+    NDArray modelInput = NDArray.array(input, Shape.create(1, input.length), Context.cpu(0));
 
     Encoder encoder = new Encoder(modelPath, INPUT_LANG_NWORDS,  HIDDEN_SIZE, NUM_LAYERS);
     AttnDecoder decoder = new AttnDecoder(modelPath, HIDDEN_SIZE, OUTPUT_LANG_NWORDS, NUM_LAYERS);
@@ -70,7 +70,7 @@ public class Seq2SeqInference {
 
       NDArray topi = NDArray.argmax(decoderOutput, 1).get();
       String token = outputLang.getString((int)topi.toScalar());
-      if (token.equals(inputLang.getString(EOS_TOKEN))) {
+      if (token.equals(outputLang.getString(EOS_TOKEN))) {
         break;
       }
       outputs.append(token).append(" ");

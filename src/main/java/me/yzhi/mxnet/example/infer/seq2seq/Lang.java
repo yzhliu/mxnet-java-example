@@ -27,4 +27,14 @@ public class Lang {
     }
     return word2index.get(word);
   }
+
+  public float[] getInput(String sentence) {
+    String[] tokens = sentence.split(" ");
+    float[] indexes = new float[tokens.length + 1];
+    for (int i = 0; i < tokens.length; ++i) {
+      indexes[i] = getIndex(tokens[i]);
+    }
+    indexes[indexes.length-1] = getIndex("EOS");
+    return indexes;
+  }
 }
