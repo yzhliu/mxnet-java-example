@@ -20,18 +20,26 @@ public class RndImageInference {
     Map<String, NDArray> argParams = model._2();
     Map<String, NDArray> auxParams = model._3();
 
-    Module module = new Module.Builder(symbol).setContext(Context.cpu(0)).build();
-    module.bind(false, false, false,
-        new DataDesc("data", dataShape, DType.Float32(), "NCHW"));
-    module.setParams(argParams, auxParams, true, true, false);
+    for (int i = 0; i < 20; ++i) {
+      Thread thread = new Thread() {
+        public void run() {
+          Module module = new Module.Builder(symbol).setContext(Context.cpu(0)).build();
+          module.bind(false, false, false, new DataDesc("data", dataShape, DType.Float32(), "NCHW"));
+          module.setParams(argParams, auxParams, true, true, false);
 
-    NDArray data = NDArray.normal(0, 1, dataShape).get();
-    DataBatch input = new DataBatch.Builder().setData(data).build();
+          while (true) {
+            NDArray data = NDArray.normal(0, 1, dataShape).get();
+            DataBatch input = new DataBatch.Builder().setData(data).build();
 
-    module.forward(input, false);
-    NDArray pred = module.getOutputs().apply(0).apply(0);
-    NDArray argmax = NDArray.argmax(pred, 1).get();
+            module.forward(input, false);
+            NDArray pred = module.getOutputs().apply(0).apply(0);
+            NDArray argmax = NDArray.argmax(pred, 1).get();
 
-    System.out.println(Arrays.toString(argmax.toArray()));
+            System.out.println(Arrays.toString(argmax.toArray()));
+          }
+        }
+      };
+      thread.start();
+    }
   }
 }
