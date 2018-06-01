@@ -9,6 +9,6 @@ python $CURR_DIR/rnd_img_infer.py
 
 echo "Run Java code ..."
 CLASSPATH=$CLASSPATH:$PROJ_DIR/target/*:$PROJ_DIR/target/classes/lib/*
-java -Xmx2G -cp $CLASSPATH \
+java -Xmx1G -cp $CLASSPATH \
   -Dlog4j.configuration=file://$PROJ_DIR/conf/log4j.properties \
   me.yzhi.mxnet.example.infer.RndImageInference
