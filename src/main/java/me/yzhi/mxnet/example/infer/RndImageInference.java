@@ -32,12 +32,17 @@ public class RndImageInference {
             DataBatch input = new DataBatch.Builder().setData(data).build();
 
             module.forward(input, false);
-            module.getOutputs().apply(0).apply(0).waitToRead();
-//            NDArray pred = module.getOutputs().apply(0).apply(0);
+//            module.getOutputs().apply(0).apply(0).waitToRead();
+            NDArray pred = module.getOutputs().apply(0).apply(0);
+//            pred.waitToRead();
+//            System.out.println(pred.shape());
 //            NDArray pred = module.predict(input).apply(0);
-//            NDArray argmax = NDArray.argmax(pred, 1).get();
+            NDArray argmax = NDArray.argmax(pred, 1).get();
+//            argmax.waitToRead();
 
-//            System.out.println(Arrays.toString(argmax.toArray()));
+//            System.out.println(argmax.shape());
+            System.out.println(Arrays.toString(argmax.toArray()));
+//            System.out.println(pred.toArray()[0]);
           }
         }
       };
