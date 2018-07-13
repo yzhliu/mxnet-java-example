@@ -25,13 +25,18 @@ public class RndImageInference {
         new DataDesc("data", dataShape, DType.Float32(), "NCHW"));
     module.setParams(argParams, auxParams, true, true, false);
 
-    NDArray data = NDArray.normal(0, 1, dataShape).get();
-    DataBatch input = new DataBatch.Builder().setData(data).build();
+    float[] argmax = NDArrayCollector.auto().withScope(new scala.runtime.AbstractFunction0<float[]>() {
+      @Override
+      public float[] apply() {
+        NDArray data = NDArray.normal(ScalaConverter.convert(0, 1, dataShape)).get();
+        DataBatch input = new DataBatch.Builder().setData(data).build();
 
-    module.forward(input, false);
-    NDArray pred = module.getOutputs().apply(0).apply(0);
-    NDArray argmax = NDArray.argmax(pred, 1).get();
+        module.forward(input, false);
+        NDArray pred = module.getOutputsMerged().apply(0);
+        return NDArray.argmax(ScalaConverter.convert(pred, 1)).toArray();
+      }
+    });
 
-    System.out.println(Arrays.toString(argmax.toArray()));
+    System.out.println(Arrays.toString(argmax));
   }
 }

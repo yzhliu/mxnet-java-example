@@ -1,5 +1,6 @@
 package me.yzhi.mxnet.example.infer.seq2seq;
 
+import me.yzhi.mxnet.example.infer.ScalaConverter;
 import org.apache.mxnet.*;
 import scala.Tuple2;
 import scala.Tuple3;
@@ -34,8 +35,8 @@ public class Encoder {
   }
 
   public Tuple2<NDArray, NDArray> predict(NDArray input, NDArray hidden) {
-    NDArray embedding = NDArray.Embedding(input, embeddingWeight, numWords, hiddenSize, dtype).get();
-    Tuple2<NDArray, NDArray> output = new Tuple2<>(NDArray.swapaxes(embedding, 0, 1).get(), hidden);
+    NDArray embedding = NDArray.Embedding(ScalaConverter.convert(input, embeddingWeight, numWords, hiddenSize, dtype)).get();
+    Tuple2<NDArray, NDArray> output = new Tuple2<>(NDArray.swapaxes(ScalaConverter.convert(embedding, 0, 1)).get(), hidden);
     for (int i = 0; i < numLayers; ++i) {
       output = gru.predict(output._1, output._2);
     }

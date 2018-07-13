@@ -1,5 +1,6 @@
 package me.yzhi.mxnet.example.infer.seq2seq;
 
+import me.yzhi.mxnet.example.infer.ScalaConverter;
 import org.apache.mxnet.*;
 import org.apache.mxnet.module.Module;
 import scala.Tuple2;
@@ -66,32 +67,32 @@ public class AttnDecoder {
   }
 
   public Tuple3<NDArray, NDArray, NDArray> predict(NDArray input, NDArray hidden, NDArray encoderOutputs) {
-    NDArray embedding = NDArray.Embedding(input, embeddingWeight, outputSize, hiddenSize, DType.Float32()).get();
+    NDArray embedding = NDArray.Embedding(ScalaConverter.convert(input, embeddingWeight, outputSize, hiddenSize, DType.Float32())).get();
     if (dropoutProb > 0) {
-      embedding = NDArray.Dropout(embedding, dropoutProb).get();
+      embedding = NDArray.Dropout(ScalaConverter.convert(embedding, dropoutProb)).get();
     }
 
     NDArray attnWeights = attn.predict(
         new DataBatch.Builder().setData(
-            NDArray.concat(embedding, NDArray.flatten(hidden), 2, 1).get()).build())
+            NDArray.concat(ScalaConverter.convert(embedding, NDArray.flatten(ScalaConverter.convert(hidden)), 2, 1)).get()).build())
         .apply(0);
-    attnWeights = NDArray.softmax(attnWeights).get();
+    attnWeights = NDArray.softmax(ScalaConverter.convert(attnWeights)).get();
 
-    NDArray attnApplied = NDArray.batch_dot(
-        NDArray.expand_dims(attnWeights, 0).get(),
-        NDArray.expand_dims(encoderOutputs, 0).get()
-    ).get();
+    NDArray attnApplied = NDArray.batch_dot(ScalaConverter.convert(
+        NDArray.expand_dims(ScalaConverter.convert(attnWeights, 0)).get(),
+        NDArray.expand_dims(ScalaConverter.convert(encoderOutputs, 0)).get()
+    )).get();
 
 
-    NDArray output = NDArray.concat(
-        NDArray.flatten(embedding).get(),
-        NDArray.flatten(attnApplied).get(), 2, 1).get();
+    NDArray output = NDArray.concat(ScalaConverter.convert(
+        NDArray.flatten(ScalaConverter.convert(embedding)).get(),
+        NDArray.flatten(ScalaConverter.convert(attnApplied)).get(), 2, 1)).get();
 
     output = attnCombine.predict(new DataBatch.Builder().setData(output).build()).apply(0);
-    output = NDArray.expand_dims(output, 0).get();
+    output = NDArray.expand_dims(ScalaConverter.convert(output, 0)).get();
 
     for (int i = 0; i < numLayers; ++i) {
-      output = NDArray.relu(output).get();
+      output = NDArray.relu(ScalaConverter.convert(output)).get();
       Tuple2<NDArray, NDArray> gruOutput = gru.predict(output, hidden);
       output = gruOutput._1;
       hidden = gruOutput._2;

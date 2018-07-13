@@ -1,10 +1,13 @@
 package me.yzhi.mxnet.example.infer.seq2seq;
 
+import me.yzhi.mxnet.example.infer.ScalaConverter;
 import org.apache.mxnet.*;
 import org.apache.mxnet.module.Module;
 import scala.Tuple2;
 import scala.Tuple3;
 import scala.collection.immutable.Map;
+
+import java.util.HashMap;
 
 public class GRUCell {
   private Module gru;
@@ -34,7 +37,7 @@ public class GRUCell {
     int axis = layout.indexOf('T');
     int length = inputs.shape().get(axis);
 
-    Object[] outputArr = new Object[length+1];
+    Object[] outputArr = new Object[length];
     for (int i = 0; i < length; ++i) {
       NDArray output = gru.predict(new DataBatch.Builder().setData(inputs.at(i), state).build()).apply(0);
       outputArr[i] = output;
@@ -42,13 +45,11 @@ public class GRUCell {
     }
 
     // stack outputs
-//    HashMap<String, Object> kwargs = new HashMap<>();
-//    kwargs.put("axis", axis);
-//    NDArray mergedOutputs = NDArray.genericNDArrayFunctionInvoke("stack",
-//        JavaConverters.asScalaIteratorConverter(outputs.iterator()).asScala().toSeq(),
-//        new ScalaConverter().convert(kwargs)).get();
-    outputArr[length] = 0;
-    NDArray mergedOutputs = NDArray.stack(outputArr).get();
+    HashMap<String, Object> kwargs = new HashMap<>();
+    kwargs.put("axis", axis);
+    NDArray mergedOutputs = NDArray.stack(
+        ScalaConverter.convert(kwargs),
+        ScalaConverter.convert(outputArr)).get();
 
     return new Tuple2<>(mergedOutputs, state);
   }
